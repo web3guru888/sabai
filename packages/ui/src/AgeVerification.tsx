@@ -5,6 +5,11 @@
  * drinking age is 20. This component provides a date-of-birth based age
  * verification gate with accurate boundary-day calculation.
  *
+ * Features:
+ * - Month-aware day validation (prevents impossible dates like Feb 31)
+ * - Focus trapping within the modal (WCAG 2.1 AA compliance)
+ * - Accurate age calculation with birthday boundary handling
+ *
  * @example
  * ```tsx
  * <AgeVerification
@@ -16,7 +21,7 @@
  * @module @sabai/ui/AgeVerification
  */
 
-import { useState, useCallback, useMemo, type CSSProperties, type ReactElement } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, type CSSProperties, type ReactElement } from 'react';
 import type { AgeVerificationProps } from './types';
 
 /** Thai month names for the date selector */
@@ -57,6 +62,18 @@ function calculateAge(day: number, month: number, year: number): number {
 
   return age;
 }
+
+/**
+ * Returns the number of days in a given month/year combination.
+ * Defaults to 31 if month or year are not yet selected.
+ */
+function getDaysInMonth(month: number, year: number): number {
+  if (!month || !year) return 31;
+  return new Date(year, month, 0).getDate();
+}
+
+/** Selector string for all focusable elements within a container */
+const FOCUSABLE_SELECTORS = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /* ──────────────────────── Inline Styles ──────────────────────── */
 
@@ -154,6 +171,9 @@ const styles: Record<string, CSSProperties> = {
  *
  * On successful verification, the result is persisted to `localStorage`
  * under the key `sabai_age_verified` and the `onVerified` callback fires.
+ *
+ * The dialog traps focus within its bounds (WCAG 2.1 AA) and validates
+ * day selection against the chosen month/year to prevent impossible dates.
  */
 export function AgeVerification({
   minimumAge = 20,
@@ -165,6 +185,9 @@ export function AgeVerification({
   const [month, setMonth] = useState<string>('');
   const [year, setYear] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
+
+  /** Ref to the dialog container for focus trapping */
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const resolvedSubtitle =
     subtitle ??
@@ -180,7 +203,56 @@ export function AgeVerification({
     return years;
   }, []);
 
+  /** Calculate max days for the selected month/year */
+  const maxDays = useMemo(() => {
+    const monthNum = month ? parseInt(month, 10) : 0;
+    const yearNum = year ? parseInt(year, 10) : 0;
+    return getDaysInMonth(monthNum, yearNum);
+  }, [month, year]);
+
+  /** Reset day if it exceeds the max for the new month/year */
+  useEffect(() => {
+    if (day !== '') {
+      const dayNum = parseInt(day, 10);
+      if (dayNum > maxDays) {
+        setDay('');
+      }
+    }
+  }, [maxDays, day]);
+
   const allSelected = day !== '' && month !== '' && year !== '';
+
+  /** Focus trap: keep Tab/Shift+Tab cycling within the modal */
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusableElements = dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS);
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    // Focus first interactive element on mount
+    firstElement?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key !== 'Tab') return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    };
+
+    dialog.addEventListener('keydown', handleKeyDown);
+    return () => dialog.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (!allSelected) return;
@@ -214,7 +286,7 @@ export function AgeVerification({
   }, [day, month, year, allSelected, minimumAge, onVerified]);
 
   return (
-    <div style={styles.overlay} role="dialog" aria-modal="true" aria-label="Age verification">
+    <div ref={dialogRef} style={styles.overlay} role="dialog" aria-modal="true" aria-label="Age verification">
       <div style={styles.card}>
         {/* Title */}
         <h1 style={styles.title}>
@@ -238,7 +310,7 @@ export function AgeVerification({
 
         {/* Date selectors */}
         <div style={styles.selectRow}>
-          {/* Day */}
+          {/* Day — dynamically capped to valid days for the selected month/year */}
           <select
             style={styles.select}
             value={day}
@@ -249,7 +321,7 @@ export function AgeVerification({
             aria-label="Day"
           >
             <option value="">วัน / Day</option>
-            {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+            {Array.from({ length: maxDays }, (_, i) => i + 1).map((d) => (
               <option key={d} value={d}>
                 {d}
               </option>

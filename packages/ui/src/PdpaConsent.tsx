@@ -7,6 +7,7 @@
  * - No pre-checked checkboxes (PDPA §19 requirement)
  * - Required vs optional consent items
  * - Timestamped consent record for audit trail
+ * - Focus trapping within the modal (WCAG 2.1 AA compliance)
  *
  * @example
  * ```tsx
@@ -18,11 +19,14 @@
  * @module @sabai/ui/PdpaConsent
  */
 
-import { useState, useCallback, useMemo, type CSSProperties, type ReactElement } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, type CSSProperties, type ReactElement } from 'react';
 import type { PdpaConsentProps, PdpaConsentItem, PdpaConsentRecord } from './types';
 
 /** localStorage key for persisting PDPA consent */
 const STORAGE_KEY = 'sabai_pdpa_consent';
+
+/** Selector string for all focusable elements within a container */
+const FOCUSABLE_SELECTORS = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /** Default consent items per Thai PDPA requirements */
 const DEFAULT_ITEMS: PdpaConsentItem[] = [
@@ -178,6 +182,9 @@ const styles: Record<string, CSSProperties> = {
  * On acceptance, the consent record is persisted to `localStorage` under the
  * key `sabai_pdpa_consent` and the `onAccept` callback fires with the full
  * consent record suitable for server-side audit storage.
+ *
+ * The dialog traps focus within its bounds (WCAG 2.1 AA) and ensures no
+ * checkboxes are pre-checked per PDPA §19.
  */
 export function PdpaConsent({
   items,
@@ -186,6 +193,9 @@ export function PdpaConsent({
   version = '1.0',
 }: PdpaConsentProps): ReactElement {
   const consentItems = items ?? DEFAULT_ITEMS;
+
+  /** Ref to the dialog container for focus trapping */
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // Initialize all consents to false (PDPA: no pre-checked boxes)
   const [consents, setConsents] = useState<Record<string, boolean>>(() => {
@@ -201,6 +211,38 @@ export function PdpaConsent({
     () => consentItems.filter((item) => item.required).every((item) => consents[item.id]),
     [consentItems, consents],
   );
+
+  /** Focus trap: keep Tab/Shift+Tab cycling within the modal */
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusableElements = dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS);
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    // Focus first interactive element on mount
+    firstElement?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key !== 'Tab') return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    };
+
+    dialog.addEventListener('keydown', handleKeyDown);
+    return () => dialog.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const toggleConsent = useCallback((id: string) => {
     setConsents((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -225,7 +267,7 @@ export function PdpaConsent({
   }, [allRequiredChecked, version, consents, onAccept]);
 
   return (
-    <div style={styles.overlay} role="dialog" aria-modal="true" aria-label="PDPA consent">
+    <div ref={dialogRef} style={styles.overlay} role="dialog" aria-modal="true" aria-label="PDPA consent">
       <div style={styles.sheet}>
         {/* Drag handle indicator */}
         <div style={styles.handle} />

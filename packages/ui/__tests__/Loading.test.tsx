@@ -24,14 +24,30 @@ describe('Loading', () => {
     expect(screen.getByText('Line 2')).toBeInTheDocument();
   });
 
-  it('shows spinner animation (style tag with keyframes)', () => {
-    const { container } = render(<Loading />);
+  it('injects spinner keyframes style into document.head (singleton)', () => {
+    render(<Loading />);
 
-    // Check that the keyframes style is injected
-    const styleTag = container.querySelector('style');
-    expect(styleTag).toBeTruthy();
-    expect(styleTag?.textContent).toContain('sabai-spin');
-    expect(styleTag?.textContent).toContain('rotate(360deg)');
+    // The style is now injected into document.head, not inline in the component
+    const headStyles = document.head.querySelectorAll('style');
+    const spinnerStyle = Array.from(headStyles).find(
+      (s) => s.textContent?.includes('sabai-spin'),
+    );
+    expect(spinnerStyle).toBeTruthy();
+    expect(spinnerStyle?.textContent).toContain('rotate(360deg)');
+  });
+
+  it('does not inject duplicate style tags on multiple renders', () => {
+    const { unmount } = render(<Loading />);
+    unmount();
+
+    render(<Loading />);
+    render(<Loading />);
+
+    const headStyles = document.head.querySelectorAll('style');
+    const spinnerStyles = Array.from(headStyles).filter(
+      (s) => s.textContent?.includes('sabai-spin'),
+    );
+    expect(spinnerStyles.length).toBe(1);
   });
 
   it('has correct aria attributes', () => {

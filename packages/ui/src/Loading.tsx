@@ -2,8 +2,9 @@
  * Loading — Full-screen loading spinner for Thai regulatory apps.
  *
  * Displays an animated circular spinner with a customizable message.
- * Uses an injected `<style>` tag for the CSS `@keyframes` animation
- * since inline styles cannot express keyframes.
+ * Uses a module-level singleton to inject the CSS `@keyframes` animation
+ * exactly once into the document head, regardless of how many `Loading`
+ * instances exist or how often they re-render.
  *
  * @example
  * ```tsx
@@ -15,6 +16,28 @@
 
 import type { CSSProperties, ReactElement } from 'react';
 import type { LoadingProps } from './types';
+
+/* ──────────────────────── Singleton Style Injection ──────────────────────── */
+
+/** Module-level flag ensuring the keyframe style is injected at most once */
+let styleInjected = false;
+
+/**
+ * Injects the spinner `@keyframes` animation into `document.head` exactly once.
+ * Safe in SSR environments — silently skips when `document` is unavailable.
+ */
+function injectSpinnerStyle(): void {
+  if (styleInjected || typeof document === 'undefined') return;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes sabai-spin {
+      to { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+  styleInjected = true;
+}
 
 /* ──────────────────────── Inline Styles ──────────────────────── */
 
@@ -52,21 +75,22 @@ const styles: Record<string, CSSProperties> = {
   },
 };
 
-/** CSS keyframes for the spinner rotation — injected once via <style> */
-const KEYFRAMES = `@keyframes sabai-spin { to { transform: rotate(360deg); } }`;
-
 /**
  * Loading renders a full-screen overlay with an animated spinner and
  * an optional loading message.
+ *
+ * The spinner keyframe animation is injected into the document head
+ * exactly once (singleton pattern), preventing style tag accumulation
+ * across multiple renders or instances.
  */
 export function Loading({
   message = 'กำลังโหลด...\nLoading...',
 }: LoadingProps): ReactElement {
+  // Inject the keyframe style exactly once across all instances/renders
+  injectSpinnerStyle();
+
   return (
     <div style={styles.overlay} role="status" aria-live="polite" aria-label="Loading">
-      {/* Inject keyframes for the spinner animation */}
-      <style>{KEYFRAMES}</style>
-
       <div style={styles.spinner} />
       <p style={styles.message}>
         {message.split('\n').map((line, i) => (
