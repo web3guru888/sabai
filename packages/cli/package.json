@@ -12,6 +12,7 @@
   "scripts": {
     "build": "tsup && rm -rf dist/templates && cp -r src/templates dist/templates",
     "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "clean": "rm -rf dist"
   },
