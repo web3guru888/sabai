@@ -11,8 +11,8 @@ export function ProfilePage() {
   const lang = i18n.language as 'th' | 'en';
 
   const { profile, isLoggedIn, logout } = useLiff({
-    liffId: 'placeholder',
-    mockMode: true,
+    liffId: import.meta.env.VITE_LIFF_ID || 'placeholder',
+    mockMode: import.meta.env.VITE_MOCK_MODE === 'true',
   });
 
   const toggleLanguage = () => {

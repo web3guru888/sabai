@@ -15,7 +15,7 @@ export function OrderConfirmationPage() {
   if (!order) {
     return (
       <div className="min-h-screen flex items-center justify-center text-sabai-muted">
-        Order not found
+        {t('order.notFound')}
       </div>
     );
   }
@@ -34,7 +34,7 @@ export function OrderConfirmationPage() {
       await shareMessage([flex as unknown as Record<string, unknown>]);
     } catch {
       // Share not available in browser mode — that's OK
-      alert('LINE Share is only available inside the LINE app');
+      alert(t('order.lineShareUnavailable'));
     }
   };
 

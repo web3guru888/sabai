@@ -19,7 +19,7 @@ export function ProductPage() {
   if (!product) {
     return (
       <div className="p-8 text-center text-sabai-muted">
-        Product not found
+        {t('product.notFound')}
       </div>
     );
   }

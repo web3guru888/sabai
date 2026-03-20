@@ -31,6 +31,11 @@ const en = {
     'product.origin': 'Origin',
     'product.relatedProducts': 'Related Products',
     'product.added': 'Added!',
+    'product.notFound': 'Product not found',
+
+    // cart
+    // search
+    'search.noResults': 'No results found',
 
     // cart
     'cart.empty': 'Your cart is empty',
@@ -65,6 +70,8 @@ const en = {
     'order.continueShopping': 'Continue Shopping',
     'order.total': 'Total',
     'order.items': 'Order Items',
+    'order.notFound': 'Order not found',
+    'order.lineShareUnavailable': 'LINE Share is only available inside the LINE app',
 
     // profile
     'profile.title': 'Profile',

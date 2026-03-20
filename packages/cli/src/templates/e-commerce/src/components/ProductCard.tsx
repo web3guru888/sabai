@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../stores/appStore';
@@ -14,6 +14,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const navigate = useAppStore((s) => s.navigate);
   const addToCart = useCartStore((s) => s.addToCart);
   const [showAdded, setShowAdded] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const lang = i18n.language as 'th' | 'en';
   const name = product.name[lang] || product.name.th;
@@ -23,8 +24,15 @@ export function ProductCard({ product }: ProductCardProps) {
     if (!product.inStock) return;
     addToCart(product);
     setShowAdded(true);
-    setTimeout(() => setShowAdded(false), 1200);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setShowAdded(false), 1200);
   };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   return (
     <motion.div

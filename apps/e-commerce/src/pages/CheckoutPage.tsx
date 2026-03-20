@@ -28,31 +28,36 @@ export function CheckoutPage() {
 
   const canSubmit = address.trim().length > 0 && timeSlot !== null && !isSubmitting;
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!canSubmit) return;
     setIsSubmitting(true);
 
-    // Generate order ID
-    const orderId = `SB-${Date.now().toString(36).toUpperCase()}`;
-    const cartItems = Object.values(items);
+    try {
+      // Generate order ID
+      const orderId = `SB-${Date.now().toString(36).toUpperCase()}`;
+      const cartItems = Object.values(items);
 
-    const order: Order = {
-      id: orderId,
-      items: cartItems,
-      subtotal: getSubtotal(),
-      deliveryFee: getDeliveryFee(),
-      total: getTotal(),
-      address,
-      timeSlot: timeSlot ?? '',
-      paymentMethod,
-      createdAt: new Date().toISOString(),
-    };
+      const order: Order = {
+        id: orderId,
+        items: cartItems,
+        subtotal: getSubtotal(),
+        deliveryFee: getDeliveryFee(),
+        total: getTotal(),
+        address,
+        timeSlot: timeSlot ?? '',
+        paymentMethod,
+        createdAt: new Date().toISOString(),
+      };
 
-    addOrder(order);
-    clearCart();
+      addOrder(order);
+      clearCart();
 
-    // Navigate to confirmation
-    navigate('order-confirmation', orderId);
+      // Navigate to confirmation
+      navigate('order-confirmation', orderId);
+    } catch (error) {
+      console.error('Order placement failed:', error);
+      setIsSubmitting(false);
+    }
   };
 
   return (
