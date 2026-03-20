@@ -1,6 +1,7 @@
 {
   "name": "@sabai/payments",
   "version": "0.0.1",
+  "description": "Payment integrations for Thailand — LINE Pay v3, PromptPay QR (EMVCo), and Omise",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,7 +18,21 @@
     "lint": "eslint src/",
     "clean": "rm -rf dist"
   },
+  "keywords": [
+    "line-pay",
+    "promptpay",
+    "omise",
+    "thailand",
+    "payments",
+    "qr-code",
+    "emvco",
+    "liff"
+  ],
+  "dependencies": {
+    "qrcode": "^1.5.3"
+  },
   "devDependencies": {
+    "@types/qrcode": "^1.5.5",
     "tsup": "^8.4.0",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"
