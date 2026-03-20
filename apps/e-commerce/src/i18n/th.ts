@@ -31,6 +31,11 @@ const th = {
     'product.origin': 'แหล่งผลิต',
     'product.relatedProducts': 'สินค้าที่เกี่ยวข้อง',
     'product.added': 'เพิ่มแล้ว!',
+    'product.notFound': 'ไม่พบสินค้า',
+
+    // cart
+    // search
+    'search.noResults': 'ไม่พบผลลัพธ์',
 
     // cart
     'cart.empty': 'ตะกร้าว่างเปล่า',
@@ -65,6 +70,8 @@ const th = {
     'order.continueShopping': 'ช้อปปิ้งต่อ',
     'order.total': 'ยอดรวม',
     'order.items': 'รายการสินค้า',
+    'order.notFound': 'ไม่พบคำสั่งซื้อ',
+    'order.lineShareUnavailable': 'การแชร์ผ่าน LINE ใช้ได้เฉพาะในแอป LINE เท่านั้น',
 
     // profile
     'profile.title': 'โปรไฟล์',

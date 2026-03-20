@@ -143,9 +143,9 @@ describe('Cart Store', () => {
       expect(useCartStore.getState().getDeliveryFee()).toBe(0);
     });
 
-    it('charges fee for empty cart', () => {
-      // Empty cart has subtotal 0 which is < 1000
-      expect(useCartStore.getState().getDeliveryFee()).toBe(50);
+    it('no delivery fee for empty cart', () => {
+      // Empty cart should not incur a delivery fee
+      expect(useCartStore.getState().getDeliveryFee()).toBe(0);
     });
   });
 

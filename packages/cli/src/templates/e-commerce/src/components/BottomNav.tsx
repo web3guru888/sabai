@@ -32,6 +32,7 @@ export function BottomNav() {
           return (
             <button
               key={item.id}
+              aria-label={t(item.labelKey)}
               onClick={() => navigate(item.id)}
               className={`flex flex-col items-center justify-center flex-1 h-full transition-colors relative ${
                 isActive ? 'text-sabai-gold' : 'text-sabai-muted'

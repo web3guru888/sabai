@@ -71,6 +71,7 @@ export const useCartStore = create<CartState>()(
 
       getDeliveryFee: () => {
         const subtotal = get().getSubtotal();
+        if (subtotal === 0) return 0;
         return subtotal >= 1000 ? 0 : 50;
       },
 

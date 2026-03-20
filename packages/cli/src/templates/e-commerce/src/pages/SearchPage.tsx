@@ -61,7 +61,7 @@ export function SearchPage() {
         ) : (
           <div className="text-center text-sabai-muted py-20">
             <span className="text-4xl block mb-4">🔍</span>
-            <p>No results found</p>
+            <p>{t('search.noResults')}</p>
           </div>
         )}
       </div>
