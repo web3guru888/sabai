@@ -44,13 +44,15 @@ export function detectLineLanguage(): string {
 export function setupI18n(config: I18nConfig): typeof i18next {
   const defaultLang = config.defaultLanguage || detectLineLanguage();
 
-  void i18next.use(initReactI18next).init({
+  i18next.use(initReactI18next).init({
     resources: config.resources,
     lng: defaultLang,
     fallbackLng: 'th',
     interpolation: {
       escapeValue: false, // React already escapes by default
     },
+  }).catch((err: unknown) => {
+    console.error('[sabai/core] i18n initialization failed:', err);
   });
 
   return i18next;

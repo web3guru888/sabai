@@ -36,5 +36,5 @@ export function getSabaiConfig(): SabaiEnvConfig {
   if (!config) {
     throw new Error('Sabai not configured. Call configureSabai() first.');
   }
-  return config;
+  return { ...config };
 }

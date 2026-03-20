@@ -1,6 +1,6 @@
 // @sabai/core — React hooks for LIFF integration
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { initLiff } from './liff';
 import type { SabaiConfig, LiffState } from './types';
 
@@ -47,16 +47,20 @@ export function useLiff(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config.liffId]);
 
+  const login = useCallback(async (redirectUri?: string) => {
+    const liff = (await import('@line/liff')).default;
+    liff.login({ redirectUri });
+  }, []);
+
+  const logout = useCallback(async () => {
+    const liff = (await import('@line/liff')).default;
+    liff.logout();
+    window.location.reload();
+  }, []);
+
   return {
     ...state,
-    login: async (redirectUri?: string) => {
-      const liff = (await import('@line/liff')).default;
-      liff.login({ redirectUri });
-    },
-    logout: async () => {
-      const liff = (await import('@line/liff')).default;
-      liff.logout();
-      window.location.reload();
-    },
+    login,
+    logout,
   };
 }

@@ -45,13 +45,9 @@ describe('Environment Configuration', () => {
     // Mutate the returned config
     (config1 as Record<string, unknown>).liffId = 'mutated-id';
 
-    // Fetch again — should still return original
+    // Fetch again — should still return original because getSabaiConfig returns a defensive copy
     const config2 = getSabaiConfig();
-    // Note: getSabaiConfig() returns the same reference to `config`,
-    // but configureSabai creates a shallow copy via spread.
-    // The mutation WILL affect config2 since getSabaiConfig returns the reference.
-    // This tests documents the actual behavior.
-    expect(config2.liffId).toBe('mutated-id');
+    expect(config2.liffId).toBe('original-id');
   });
 
   it('configureSabai creates a copy — modifying original does not affect stored', async () => {

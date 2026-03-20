@@ -83,10 +83,11 @@ describe('PromptPay', () => {
     });
 
     it('handles national IDs correctly (sub-tag 02)', () => {
-      const payload = generatePromptPayPayload({ target: '1234567890123' });
+      // Use a valid Thai national ID with correct check digit
+      const payload = generatePromptPayPayload({ target: '1234567890121' });
 
       // Should contain the national ID and sub-tag 02
-      expect(payload).toContain('1234567890123');
+      expect(payload).toContain('1234567890121');
       expect(payload).toContain('A000000677010111');
     });
 
@@ -94,6 +95,30 @@ describe('PromptPay', () => {
       expect(() => generatePromptPayPayload({ target: '12345' })).toThrow(
         'Invalid PromptPay target',
       );
+    });
+
+    it('throws for negative amount', () => {
+      expect(() => generatePromptPayPayload({ target: '0812345678', amount: -10 })).toThrow(
+        'PromptPay amount must be a positive number',
+      );
+    });
+
+    it('throws for zero amount', () => {
+      expect(() => generatePromptPayPayload({ target: '0812345678', amount: 0 })).toThrow(
+        'PromptPay amount must be a positive number',
+      );
+    });
+
+    it('throws for NaN amount', () => {
+      expect(() => generatePromptPayPayload({ target: '0812345678', amount: NaN })).toThrow(
+        'PromptPay amount must be a positive number',
+      );
+    });
+
+    it('throws for amount exceeding max', () => {
+      expect(() =>
+        generatePromptPayPayload({ target: '0812345678', amount: 1000000000 }),
+      ).toThrow('PromptPay amount must not exceed 999,999,999.99');
     });
 
     it('handles phone with formatting characters', () => {

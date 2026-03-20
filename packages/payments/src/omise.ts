@@ -58,9 +58,8 @@ export class OmiseClient {
   }
 
   /**
-   * Create a new charge.
-   *
-   * **Server-side only** — requires the secret key.
+   * Create a charge (server-side only).
+   * Note: Omise API accepts both JSON and form-encoded data.
    *
    * @param request - Charge details including amount, currency, and payment source
    * @returns The created charge object

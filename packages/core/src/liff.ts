@@ -33,7 +33,13 @@ const MAX_RETRIES = 3;
  */
 export async function initLiff(config: SabaiConfig): Promise<LiffState> {
   if (initPromise) return initPromise;
-  initPromise = doInit(config);
+  initPromise = doInit(config).then((result) => {
+    // If initialization failed, clear the cached promise so retry is possible
+    if (!result.isReady) {
+      initPromise = null;
+    }
+    return result;
+  });
   return initPromise;
 }
 
