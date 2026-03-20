@@ -10,6 +10,13 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Turborepo remote caching (optional).
+# To enable, add TURBO_TOKEN secret and TURBO_TEAM variable in GitHub repo settings.
+# If not configured, Turborepo silently falls back to local caching.
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -34,8 +41,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Security Audit
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
+
       - name: Lint
         run: pnpm lint
+
+      - name: Type Check
+        run: pnpm typecheck
 
       - name: Test
         run: pnpm test
