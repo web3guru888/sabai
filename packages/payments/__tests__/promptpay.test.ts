@@ -125,6 +125,59 @@ describe('PromptPay', () => {
       const payload = generatePromptPayPayload({ target: '081-234-5678' });
       expect(payload).toContain('0066812345678');
     });
+
+    it('generates a payload matching EMVCo reference format', () => {
+      const payload = generatePromptPayPayload({ target: '0812345678', amount: 100 });
+
+      // Verify structure: starts with 000201 (format indicator)
+      expect(payload.startsWith('000201')).toBe(true);
+
+      // Dynamic QR (has amount) uses initiation method "12"
+      expect(payload).toContain('010212');
+
+      // THB currency code 764 (tag 53, length 03, value 764)
+      expect(payload).toContain('5303764');
+
+      // Country code TH (tag 58, length 02, value TH)
+      expect(payload).toContain('5802TH');
+
+      // Amount tag 54 should contain "100.00"
+      expect(payload).toContain('100.00');
+
+      // CRC is last 4 hex chars after tag 63 length 04
+      expect(payload).toMatch(/6304[0-9A-F]{4}$/);
+    });
+
+    it('generates deterministic payloads (same input → same output)', () => {
+      const payload1 = generatePromptPayPayload({ target: '0812345678', amount: 250 });
+      const payload2 = generatePromptPayPayload({ target: '0812345678', amount: 250 });
+      expect(payload1).toBe(payload2);
+    });
+
+    it('generates different payloads for different amounts', () => {
+      const payload1 = generatePromptPayPayload({ target: '0812345678', amount: 100 });
+      const payload2 = generatePromptPayPayload({ target: '0812345678', amount: 200 });
+      expect(payload1).not.toBe(payload2);
+    });
+
+    it('generates different payloads for different targets', () => {
+      const payload1 = generatePromptPayPayload({ target: '0812345678' });
+      const payload2 = generatePromptPayPayload({ target: '0899999999' });
+      expect(payload1).not.toBe(payload2);
+    });
+
+    it('handles max valid amount (999999999.99)', () => {
+      const payload = generatePromptPayPayload({ target: '0812345678', amount: 999999999.99 });
+      expect(payload).toContain('999999999.99');
+      expect(payload).toContain('010212'); // Dynamic QR
+      expect(payload).toMatch(/6304[0-9A-F]{4}$/);
+    });
+
+    it('handles small amounts with decimal precision', () => {
+      const payload = generatePromptPayPayload({ target: '0812345678', amount: 0.01 });
+      expect(payload).toContain('0.01');
+      expect(payload).toMatch(/6304[0-9A-F]{4}$/);
+    });
   });
 
   describe('generatePromptPayQR', () => {

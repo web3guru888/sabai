@@ -6,6 +6,7 @@ export default defineConfig({
       'packages/core/vitest.config.ts',
       'packages/ui/vitest.config.ts',
       'packages/payments/vitest.config.ts',
+      'packages/cli/vitest.config.ts',
       'apps/e-commerce/vitest.config.ts',
     ],
   },
