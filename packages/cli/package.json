@@ -1,16 +1,30 @@
 {
   "name": "create-sabai-app",
   "version": "0.0.1",
+  "description": "CLI scaffolding tool for Sabai LINE Mini App projects",
   "type": "module",
   "bin": {
     "create-sabai-app": "./dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && rm -rf dist/templates && cp -r src/templates dist/templates",
     "dev": "tsup --watch",
     "lint": "eslint src/",
     "clean": "rm -rf dist"
   },
+  "keywords": [
+    "sabai",
+    "line",
+    "liff",
+    "mini-app",
+    "cli",
+    "scaffold"
+  ],
+  "author": "web3guru888",
+  "license": "MIT",
   "devDependencies": {
     "tsup": "^8.4.0",
     "typescript": "^5.8.3"
