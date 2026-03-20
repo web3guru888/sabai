@@ -1,6 +1,6 @@
 {
   "name": "create-sabai-app",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "CLI scaffolding tool for Sabai LINE Mini App projects",
   "type": "module",
   "bin": {

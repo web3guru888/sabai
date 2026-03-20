@@ -1,14 +1,26 @@
 {
   "name": "@sabai/payments",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Payment integrations for Thailand — LINE Pay v3, PromptPay QR (EMVCo), and Omise",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./promptpay": {
+      "types": "./dist/promptpay.d.ts",
+      "import": "./dist/promptpay.js"
+    },
+    "./linepay": {
+      "types": "./dist/linepay.d.ts",
+      "import": "./dist/linepay.js"
+    },
+    "./omise": {
+      "types": "./dist/omise.d.ts",
+      "import": "./dist/omise.js"
     }
   },
   "scripts": {

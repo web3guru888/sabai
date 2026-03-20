@@ -78,12 +78,20 @@ export function formatPhoneForPromptPay(phone: string): string {
 }
 
 /**
- * Validate a Thai national ID number.
- *
- * @param id - 13-digit Thai national ID
- * @returns true if the format is valid (13 digits)
+ * Validate a Thai national ID number using the check digit algorithm.
+ * Thai national IDs are 13 digits where digit 13 is a check digit
+ * computed from digits 1-12 using a weighted sum modulo 11.
+ * @param id - The national ID string
+ * @returns true if valid
  */
 export function isValidNationalId(id: string): boolean {
   const digits = id.replace(/\D/g, '');
-  return digits.length === 13;
+  if (digits.length !== 13) return false;
+
+  let sum = 0;
+  for (let i = 0; i < 12; i++) {
+    sum += parseInt(digits[i], 10) * (13 - i);
+  }
+  const check = (11 - (sum % 11)) % 10;
+  return check === parseInt(digits[12], 10);
 }

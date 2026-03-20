@@ -80,8 +80,14 @@ describe('Payment Utilities', () => {
   });
 
   describe('isValidNationalId', () => {
-    it('validates a 13-digit national ID', () => {
-      expect(isValidNationalId('1234567890123')).toBe(true);
+    it('validates a 13-digit national ID with correct check digit', () => {
+      // 1234567890121 has check digit 1 (valid)
+      expect(isValidNationalId('1234567890121')).toBe(true);
+    });
+
+    it('rejects a 13-digit national ID with incorrect check digit', () => {
+      // 1234567890123 has expected check digit 1, not 3
+      expect(isValidNationalId('1234567890123')).toBe(false);
     });
 
     it('rejects non-13-digit strings', () => {
@@ -90,8 +96,11 @@ describe('Payment Utilities', () => {
       expect(isValidNationalId('')).toBe(false);
     });
 
-    it('strips non-digit characters', () => {
-      expect(isValidNationalId('1-2345-67890-12-3')).toBe(true);
+    it('strips non-digit characters and validates', () => {
+      // '1-2345-67890-12-1' -> '1234567890121' (valid)
+      expect(isValidNationalId('1-2345-67890-12-1')).toBe(true);
+      // '1-2345-67890-12-3' -> '1234567890123' (invalid check digit)
+      expect(isValidNationalId('1-2345-67890-12-3')).toBe(false);
     });
   });
 });

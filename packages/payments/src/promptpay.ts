@@ -39,6 +39,17 @@ const PROMPTPAY_AID = 'A000000677010111';
  */
 export function generatePromptPayPayload(config: PromptPayConfig): string {
   const { target, amount } = config;
+
+  // Validate amount if provided
+  if (amount != null) {
+    if (isNaN(amount) || amount <= 0) {
+      throw new Error('PromptPay amount must be a positive number');
+    }
+    if (amount > 999999999.99) {
+      throw new Error('PromptPay amount must not exceed 999,999,999.99');
+    }
+  }
+
   const sanitisedTarget = target.replace(/\D/g, '');
 
   // Determine target type and format the identifier
