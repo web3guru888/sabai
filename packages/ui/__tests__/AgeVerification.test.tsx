@@ -149,4 +149,53 @@ describe('AgeVerification', () => {
     expect(dialog).toHaveAttribute('aria-modal', 'true');
     expect(dialog).toHaveAttribute('aria-label', 'Age verification');
   });
+
+  it('handles leap year birthday (Feb 29) without crashing', () => {
+    render(<AgeVerification onVerified={onVerified} />);
+
+    // Select February — days should adjust to 28 or 29 depending on year
+    fireEvent.change(screen.getByLabelText('Month'), { target: { value: '2' } });
+    // Select a leap year (2000 is a leap year)
+    fireEvent.change(screen.getByLabelText('Year'), { target: { value: '2000' } });
+    // Day 29 should be available in Feb of a leap year
+    fireEvent.change(screen.getByLabelText('Day'), { target: { value: '29' } });
+
+    const button = screen.getByRole('button', { name: /ยืนยัน/ });
+    expect(button).not.toBeDisabled();
+
+    fireEvent.click(button);
+
+    // Person born Feb 29, 2000 is 24–25 years old — should pass age 20 check
+    expect(onVerified).toHaveBeenCalledTimes(1);
+  });
+
+  it('limits February to 28 days in a non-leap year', () => {
+    render(<AgeVerification onVerified={onVerified} />);
+
+    // Select February and a non-leap year
+    fireEvent.change(screen.getByLabelText('Month'), { target: { value: '2' } });
+    fireEvent.change(screen.getByLabelText('Year'), { target: { value: '1999' } });
+
+    // The day select should have at most 28 options (plus the placeholder)
+    const daySelect = screen.getByLabelText('Day');
+    const options = daySelect.querySelectorAll('option');
+    // 28 day options + 1 placeholder = 29
+    expect(options.length).toBe(29);
+  });
+
+  it('resets day if it exceeds max days after month change', () => {
+    render(<AgeVerification onVerified={onVerified} />);
+
+    // Select day 31 in January (valid)
+    fireEvent.change(screen.getByLabelText('Year'), { target: { value: '1990' } });
+    fireEvent.change(screen.getByLabelText('Month'), { target: { value: '1' } });
+    fireEvent.change(screen.getByLabelText('Day'), { target: { value: '31' } });
+
+    // Now switch to February — day 31 is invalid, should be reset
+    fireEvent.change(screen.getByLabelText('Month'), { target: { value: '2' } });
+
+    // Button should be disabled since day was reset
+    const button = screen.getByRole('button', { name: /ยืนยัน/ });
+    expect(button).toBeDisabled();
+  });
 });
